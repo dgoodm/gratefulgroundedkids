@@ -1,0 +1,4 @@
+# Redirect old Rich Road Stewardship paths if needed
+# /old-path  /new-path  301
+
+# Ensure clean URLs (Cloudflare Pages handles this by default)
