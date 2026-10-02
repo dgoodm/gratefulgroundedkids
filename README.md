@@ -23,6 +23,7 @@ gratefulgroundedkids/
 ├── services.html           # Seminars, sessions, consulting
 ├── resources.html          # Downloadable docs + book recs
 ├── connect.html            # Contact/interest form
+├── 404.html                # Not-found page (without it, Cloudflare serves the home page for missing URLs)
 ├── css/
 │   └── style.css           # Full design system
 ├── js/
