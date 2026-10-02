@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resources — Grateful Grounded Kids</title>
+  <title>Resources — Grateful &amp; Grounded Kids</title>
   <meta name="description" content="Downloadable worksheets, planning tools, and curated book recommendations for families building a grounded household.">
-  <meta property="og:title" content="Resources — Grateful Grounded Kids">
+  <meta property="og:title" content="Resources — Grateful &amp; Grounded Kids">
   <meta property="og:description" content="Free worksheets, planning tools, and book recommendations to help your family build a household economy around work, finances, and technology.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://gratefulgroundedkids.com/resources">
@@ -20,14 +20,23 @@
   <header class="site-header" id="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
-        <img src="/assets/images/logo.png" alt="Grateful Grounded Kids" class="logo-img">
+        <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="logo-img">
       </a>
       <nav class="main-nav" id="main-nav">
         <ul class="nav-list">
           <li><a href="/" class="nav-link">Home</a></li>
           <li><a href="/workshop" class="nav-link">Workshop</a></li>
           <li><a href="/services" class="nav-link">Services</a></li>
-          <li><a href="/resources" class="nav-link">Resources</a></li>
+          <li class="has-dropdown">
+            <a href="/resources" class="nav-link">Resources</a>
+            <div class="dropdown">
+              <ul class="dropdown-list">
+                <li><a href="/resources#chores-work" class="dropdown-link">Chores &amp; Work</a></li>
+                <li><a href="/resources#finances" class="dropdown-link">Finances</a></li>
+                <li><a href="/resources#technology" class="dropdown-link">Technology</a></li>
+              </ul>
+            </div>
+          </li>
           <li><a href="/connect" class="nav-link">Connect</a></li>
         </ul>
       </nav>
@@ -53,9 +62,9 @@
 
       <!-- Tab Navigation -->
       <div class="resource-tabs">
-        <button class="resource-tab active" data-category="cat-work">Chores &amp; Work</button>
-        <button class="resource-tab" data-category="cat-finances">Finances</button>
-        <button class="resource-tab" data-category="cat-technology">Technology</button>
+        <button class="resource-tab active" data-category="cat-work" data-slug="chores-work">Chores &amp; Work</button>
+        <button class="resource-tab" data-category="cat-finances" data-slug="finances">Finances</button>
+        <button class="resource-tab" data-category="cat-technology" data-slug="technology">Technology</button>
       </div>
 
       <!-- ── CHORES & WORK ── -->
@@ -110,7 +119,6 @@
             <a href="/assets/docs/earning-opportunities-pay-chart.docx" class="btn btn-primary btn-sm" download>Download</a>
           </div>
 
-          <!-- Hidden until the file exists: add assets/docs/working-earning-plan-ideas.docx, then remove this comment wrapper
           <div class="doc-card">
             <div class="doc-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -119,9 +127,9 @@
               <h3 class="doc-title">Working and Earning Plan and Ideas</h3>
               <p class="doc-desc">Creative ideas and a planning framework for helping kids earn money through meaningful work.</p>
             </div>
-            <a href="/assets/docs/working-earning-plan-ideas.docx" class="btn btn-primary btn-sm" download>Download</a>
+            <!-- When the file exists at assets/docs/working-earning-plan-ideas.docx, swap this label for a Download link like the other cards -->
+            <span class="btn btn-sm btn-disabled">Coming soon</span>
           </div>
-          -->
 
           <div class="doc-card">
             <div class="doc-icon">
@@ -295,7 +303,7 @@
     <div class="container">
       <div class="cta-banner">
         <h2 class="section-title">Get the Book</h2>
-        <p class="section-desc">Doug's book, <em>Grateful &amp; Grounded</em>, is the most complete resource for building a household economy that actually works.</p>
+        <p class="section-desc">Doug's book, <em>Grateful &amp; Grounded Kids</em>, is the most complete resource for building a household economy that actually works.</p>
         <a href="https://a.co/d/0hMkGw1y" target="_blank" rel="noopener" class="btn btn-white btn-lg">Order on Amazon</a>
       </div>
     </div>
@@ -306,7 +314,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <img src="/assets/images/logo.png" alt="Grateful Grounded Kids" class="logo-img footer-logo">
+          <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="logo-img footer-logo">
           <p class="footer-tagline">Raising grateful and grounded kids in an age of entitlement.</p>
           <div class="footer-social">
             <a href="https://www.instagram.com/richroadstewardship/" target="_blank" rel="noopener" aria-label="Instagram">
@@ -340,7 +348,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <span>&copy; 2026 Grateful Grounded Kids. All rights reserved.</span>
+        <span>&copy; 2026 Grateful &amp; Grounded Kids. All rights reserved.</span>
         <span><a href="/admin" style="color:inherit;">Admin</a></span>
       </div>
     </div>

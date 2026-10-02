@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   GRATEFUL GROUNDED KIDS — Form Handler
+   GRATEFUL & GROUNDED KIDS — Form Handler
    Client-side validation + POST to
    Cloudflare Pages Function (/api/contact)
    ═══════════════════════════════════════ */

@@ -1,6 +1,6 @@
-# Grateful Grounded Kids
+# Grateful & Grounded Kids
 
-Website for Doug's Grateful Grounded Kids — workshops, speaking, and consulting for families raising grateful and grounded kids in an age of entitlement.
+Website for Doug's Grateful & Grounded Kids — workshops, speaking, and consulting for families raising grateful and grounded kids in an age of entitlement.
 
 **Live site:** https://gratefulgroundedkids.com
 

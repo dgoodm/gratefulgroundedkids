@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   GRATEFUL GROUNDED KIDS
+   GRATEFUL & GROUNDED KIDS
    Direction A: Deep Roots
    Playfair Display + Source Sans 3
    ═══════════════════════════════════════════════ */
@@ -33,7 +33,7 @@
   --container:    1120px;
   --gutter:       20px;
 
-  --header-h:     72px;
+  --header-h:     84px;
 }
 
 /* ── RESET ── */
@@ -155,6 +155,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 .btn-sm { font-size: 14px; padding: 10px 22px; }
 .btn-lg { font-size: 18px; padding: 18px 40px; }
+.btn-disabled {
+  background: var(--linen-dark);
+  color: var(--faint);
+  cursor: default;
+}
 
 /* ── HEADER ── */
 .site-header {
@@ -177,9 +182,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   gap: 32px;
 }
 .logo { flex-shrink: 0; }
-.logo-img { height: 40px; width: auto; }
+.logo-img { height: 52px; width: auto; }
 .site-header:not(.scrolled) .logo-img { filter: brightness(0) invert(1); }
-.footer-logo { height: 36px; filter: brightness(0) invert(1); margin-bottom: 12px; }
+.footer-logo { height: 56px; filter: brightness(0) invert(1); margin-bottom: 16px; }
 .logo-text {
   font-family: var(--font-display);
   font-size: 18px;
@@ -218,12 +223,64 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   color: var(--canopy);
 }
 
+/* Resources dropdown */
+.has-dropdown { position: relative; }
+.has-dropdown > .nav-link::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-3px) rotate(45deg);
+}
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 210px;
+  padding-top: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity .15s, transform .15s, visibility .15s;
+}
+.has-dropdown:hover .dropdown,
+.has-dropdown:focus-within .dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.dropdown-list {
+  background: var(--white);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+}
+.dropdown-link {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.dropdown-link:hover,
+.dropdown-link.active {
+  color: var(--grove);
+  background: rgba(74,124,47,.08);
+}
+
 /* Mobile menu toggle */
 .menu-toggle {
   display: none;
   flex-direction: column;
   gap: 5px;
   padding: 8px;
+  margin-left: auto;
 }
 .menu-toggle span {
   display: block;
@@ -259,11 +316,42 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   height: 100%;
   object-fit: cover;
 }
+/* YouTube player as a background. The frame stops 2px short of the overlay so no
+   uncovered row of video can show along the banner's bottom edge. */
+.hero-video-frame {
+  position: absolute;
+  inset: 0 0 2px 0;
+  overflow: hidden;
+  container-type: size;
+}
+/* A 16:9 player sized to cover the frame, 20% oversized so YouTube's title bar and
+   logo fall outside the visible area */
+.hero-video-frame iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  width: max(120cqw, 213.4cqh);
+  height: max(120cqh, 67.5cqw);
+  transform: translate(-50%, -50%);
+  border: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1s;
+}
+.hero-video-bg.is-playing iframe { opacity: 1; }
 .hero-video-bg::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(36,61,16,.92) 0%, rgba(36,61,16,.78) 50%, rgba(28,18,8,.85) 100%);
+}
+/* The video has captions burned into its lower edge; a solid band hides them while it plays */
+.hero-video-bg.is-playing::after {
+  background:
+    linear-gradient(to top, var(--canopy) 24%, rgba(36,61,16,0) 44%),
+    linear-gradient(135deg, rgba(36,61,16,.92) 0%, rgba(36,61,16,.78) 50%, rgba(28,18,8,.85) 100%);
 }
 .hero .container { position: relative; z-index: 1; }
 .hero-inner {
@@ -643,6 +731,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   gap: 8px;
   margin-bottom: 32px;
   flex-wrap: wrap;
+  scroll-margin-top: calc(var(--header-h) + 24px);
 }
 .resource-tab {
   font-size: 15px;
@@ -934,7 +1023,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 @media (max-width: 768px) {
   .section { padding-block: 56px; }
-  :root { --header-h: 60px; }
+  :root { --header-h: 68px; }
+  .site-header .logo-img { height: 42px; }
   .main-nav,
   .header-cta { display: none; }
   .menu-toggle { display: flex; }
@@ -952,6 +1042,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     gap: 0;
   }
   .main-nav.open .nav-link {
+    display: block;
     color: var(--bark);
     padding: 12px 16px;
     border-radius: var(--radius);
@@ -962,6 +1053,22 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     background: rgba(74,124,47,.06);
     color: var(--grove);
   }
+  .has-dropdown > .nav-link::after { display: none; }
+  .dropdown {
+    position: static;
+    min-width: 0;
+    padding: 0 0 4px 16px;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .dropdown-list {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+  .dropdown-link { padding: 10px 16px; }
   .hero { padding-bottom: 56px; min-height: auto; }
   .form-row { grid-template-columns: 1fr; }
   .timeline::before { left: 19px; }

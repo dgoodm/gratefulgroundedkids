@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   GRATEFUL GROUNDED KIDS
+   GRATEFUL & GROUNDED KIDS
    Cloudflare Pages Function — /api/contact
    Receives form submissions and sends
    notification emails via Resend.
@@ -64,7 +64,7 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Grateful Grounded Kids <noreply@gratefulgroundedkids.com>',
+        from: 'Grateful & Grounded Kids <noreply@gratefulgroundedkids.com>',
         to: [notificationEmail],
         subject: `New ${data.topic} inquiry from ${data.firstName} ${data.lastName || ''}`.trim(),
         html: `
@@ -97,19 +97,19 @@ export async function onRequestPost(context) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Doug at Grateful Grounded Kids <noreply@gratefulgroundedkids.com>',
+        from: 'Doug at Grateful & Grounded Kids <noreply@gratefulgroundedkids.com>',
         to: [data.email],
-        subject: 'Thanks for reaching out — Grateful Grounded Kids',
+        subject: 'Thanks for reaching out — Grateful & Grounded Kids',
         html: `
           <div style="max-width:600px;font-family:system-ui,sans-serif;color:#1C1208;">
             <h2 style="color:#243D10;">Thanks for reaching out, ${data.firstName}!</h2>
             <p>I received your message and will get back to you within 1–2 business days.</p>
             <p>In the meantime, feel free to check out the book:</p>
-            <p><a href="https://a.co/d/0hMkGw1y" style="color:#4A7C2F;">Grateful & Grounded on Amazon</a></p>
+            <p><a href="https://a.co/d/0hMkGw1y" style="color:#4A7C2F;">Grateful &amp; Grounded Kids on Amazon</a></p>
             <br>
             <p>— Doug</p>
             <hr style="border:none;border-top:1px solid #D4C9A8;margin:1.5rem 0;">
-            <p style="font-size:.85rem;color:#8C7D64;">Grateful Grounded Kids &middot; <a href="https://gratefulgroundedkids.com" style="color:#4A7C2F;">gratefulgroundedkids.com</a></p>
+            <p style="font-size:.85rem;color:#8C7D64;">Grateful &amp; Grounded Kids &middot; <a href="https://gratefulgroundedkids.com" style="color:#4A7C2F;">gratefulgroundedkids.com</a></p>
           </div>
         `,
       }),

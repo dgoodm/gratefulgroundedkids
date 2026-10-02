@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grateful Grounded Kids — Raising Grateful and Grounded Kids in an Age of Entitlement</title>
-  <meta name="description" content="Grateful Grounded Kids helps families raise responsible, financially literate, and tech-wise children through workshops, seminars, and private consulting with Doug.">
-  <meta property="og:title" content="Grateful Grounded Kids">
+  <title>Grateful &amp; Grounded Kids — Raising Grateful and Grounded Kids in an Age of Entitlement</title>
+  <meta name="description" content="Grateful &amp; Grounded Kids helps families raise responsible, financially literate, and tech-wise children through workshops, seminars, and private consulting with Doug.">
+  <meta property="og:title" content="Grateful &amp; Grounded Kids">
   <meta property="og:description" content="Raising grateful and grounded kids in an age of entitlement — through Work, Finances, and Technology.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://gratefulgroundedkids.com">
@@ -20,14 +20,23 @@
   <header class="site-header" id="site-header">
     <div class="container header-inner">
       <a href="/" class="logo">
-        <img src="/assets/images/logo.png" alt="Grateful Grounded Kids" class="logo-img">
+        <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="logo-img">
       </a>
       <nav class="main-nav" id="main-nav">
         <ul class="nav-list">
           <li><a href="/" class="nav-link">Home</a></li>
           <li><a href="/workshop" class="nav-link">Workshop</a></li>
           <li><a href="/services" class="nav-link">Services</a></li>
-          <li><a href="/resources" class="nav-link">Resources</a></li>
+          <li class="has-dropdown">
+            <a href="/resources" class="nav-link">Resources</a>
+            <div class="dropdown">
+              <ul class="dropdown-list">
+                <li><a href="/resources#chores-work" class="dropdown-link">Chores &amp; Work</a></li>
+                <li><a href="/resources#finances" class="dropdown-link">Finances</a></li>
+                <li><a href="/resources#technology" class="dropdown-link">Technology</a></li>
+              </ul>
+            </div>
+          </li>
           <li><a href="/connect" class="nav-link">Connect</a></li>
         </ul>
       </nav>
@@ -41,15 +50,13 @@
   <!-- ═══ HERO ═══ -->
   <section class="hero">
     <div class="hero-video-bg">
-      <!-- Self-host this video file for background use (YouTube embeds can't be used as bg video) -->
-      <video autoplay muted loop playsinline>
-        <source src="/assets/video/hero-bg.mp4" type="video/mp4">
-      </video>
+      <!-- main.js turns this into a muted, looping YouTube player behind the banner. To self-host instead, replace it with a <video> pointing at an MP4 in /assets/video/ -->
+      <div class="hero-video-frame"><div id="hero-video" data-video-id="QNwwUT_PlNQ"></div></div>
     </div>
     <div class="container">
       <div class="hero-inner">
         <div class="hero-content">
-          <div class="hero-eyebrow">Grateful Grounded Kids</div>
+          <div class="hero-eyebrow">Grateful &amp; Grounded Kids</div>
           <h1 class="hero-title">Raising Grateful and Grounded Kids</h1>
           <p class="hero-subtitle">in an Age of Entitlement</p>
           <p class="hero-body">by developing a household economy around Work, Finances, and Technology.</p>
@@ -59,8 +66,7 @@
           </div>
         </div>
         <div class="hero-image">
-          <!-- Replace with headshot or hero image -->
-          <img src="/assets/images/headshot.jpg" alt="Doug speaking" onerror="this.style.display='none'">
+          <img src="/assets/images/headshot.jpg" alt="Doug Goodmundson">
         </div>
       </div>
     </div>
@@ -105,15 +111,14 @@
     <div class="container">
       <div class="split">
         <div>
-          <!-- Replace with Doug's headshot -->
-          <img src="/assets/images/headshot.jpg" alt="Doug" class="about-photo" onerror="this.style.background='var(--border)';this.alt='Photo coming soon'">
+          <img src="/assets/images/headshot.jpg" alt="Doug Goodmundson" class="about-photo">
         </div>
         <div>
           <div class="section-eyebrow">About Doug</div>
-          <h2 class="section-title">Welcome to Grateful Grounded Kids.</h2>
+          <h2 class="section-title">Welcome to Grateful &amp; Grounded Kids.</h2>
           <p>No parent wakes up praying our kids grow up to be entitled. And yet, here we are, raising kids in the Age of Entitlement.</p>
           <p class="mt-sm">As a father of four, I've become convinced that entitlement is not random. It is the natural result of an overabundance of privilege paired with a deficit of responsibility. When that imbalance settles into a family culture, it slowly strains gratitude, resilience, and unity.</p>
-          <p class="mt-sm">Grateful Grounded Kids exists to help families restore the right order — to elevate responsibility, cultivate financial wisdom, and ensure that privilege (especially technology) never outpaces character.</p>
+          <p class="mt-sm">Grateful &amp; Grounded Kids exists to help families restore the right order — to elevate responsibility, cultivate financial wisdom, and ensure that privilege (especially technology) never outpaces character.</p>
           <dl class="about-creds">
             <dt>Education</dt>
             <dd>B.A. in Economics, Saint Olaf College · M.A. in Intercultural Leadership, Bethany University</dd>
@@ -133,7 +138,7 @@
       <div class="split split--reverse">
         <div>
           <div class="section-eyebrow">New Book</div>
-          <h2 class="section-title">Grateful &amp; Grounded</h2>
+          <h2 class="section-title">Grateful &amp; Grounded Kids</h2>
           <p>Research and experience consistently show that children flourish when responsibility rises to meet opportunity. When they contribute meaningfully at home, learn to steward money wisely, and live within clear and healthy technology boundaries, they grow into adults who are grounded, capable, and thankful.</p>
           <p class="mt-sm">This book is your guide to building a household economy that actually works — one where chores, money, and privilege make sense to your kids, not just to you.</p>
           <div class="mt-md">
@@ -141,7 +146,7 @@
           </div>
         </div>
         <div class="split-image">
-          <img src="/assets/images/book-cover.jpg" alt="Grateful & Grounded book cover">
+          <img src="/assets/images/book-cover.jpg" alt="Grateful &amp; Grounded Kids book cover">
         </div>
       </div>
     </div>
@@ -153,11 +158,11 @@
       <div class="section-header section-header--center">
         <div class="section-eyebrow">Watch</div>
         <h2 class="section-title">Hear From Doug</h2>
-        <p class="section-desc">A look at the ideas behind Grateful Grounded Kids and why this work matters for families today.</p>
+        <p class="section-desc">A look at the ideas behind Grateful &amp; Grounded Kids and why this work matters for families today.</p>
       </div>
       <div style="max-width:740px;margin-inline:auto;">
         <div class="video-wrap">
-          <iframe src="https://www.youtube.com/embed/QNwwUT_PlNQ" title="Doug — Grateful Grounded Kids" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+          <iframe src="https://www.youtube.com/embed/QNwwUT_PlNQ" title="Doug — Grateful &amp; Grounded Kids" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
         </div>
       </div>
     </div>
@@ -225,7 +230,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <img src="/assets/images/logo.png" alt="Grateful Grounded Kids" class="logo-img footer-logo">
+          <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="logo-img footer-logo">
           <p class="footer-tagline">Raising grateful and grounded kids in an age of entitlement.</p>
           <div class="footer-social">
             <a href="https://www.instagram.com/richroadstewardship/" target="_blank" rel="noopener" aria-label="Instagram">
@@ -259,7 +264,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <span>&copy; 2026 Grateful Grounded Kids. All rights reserved.</span>
+        <span>&copy; 2026 Grateful &amp; Grounded Kids. All rights reserved.</span>
         <span><a href="/admin" style="color:inherit;">Admin</a></span>
       </div>
     </div>
