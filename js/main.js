@@ -102,6 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
             frame.setAttribute('aria-hidden', 'true');
             e.target.mute();
             e.target.playVideo();
+            // Browsers hold back autoplay in a background tab; start it when the tab is shown
+            document.addEventListener('visibilitychange', () => {
+              if (!document.hidden) e.target.playVideo();
+            });
             // Loop by jumping back just before the end, so YouTube's end screen never shows
             setInterval(() => {
               const duration = e.target.getDuration();
@@ -123,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── SMOOTH SCROLL for anchor links ──
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
-      if (anchor.getAttribute('href') === '#') return;
+      // "#" marks a link with no address yet (LinkedIn): do nothing instead of jumping to the top
+      if (anchor.getAttribute('href') === '#') { e.preventDefault(); return; }
       const target = document.querySelector(anchor.getAttribute('href'));
       if (target) {
         e.preventDefault();

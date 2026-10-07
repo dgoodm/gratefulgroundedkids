@@ -74,12 +74,12 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 .section--canopy .section-desc { color: rgba(245,237,216,.75); }
 
 .section-eyebrow {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--harvest);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .section-title {
   font-family: var(--font-display);
@@ -155,6 +155,12 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 .btn-sm { font-size: 14px; padding: 10px 22px; }
 .btn-lg { font-size: 18px; padding: 18px 40px; }
+@media (min-width: 769px) {
+  .btn { font-size: 16px; padding: 14px 32px; }
+  .btn-sm { font-size: 15px; padding: 11px 24px; }
+  .btn-lg { font-size: 19px; padding: 20px 44px; }
+}
+.btn-block { width: 100%; justify-content: center; }
 .btn-disabled {
   background: var(--linen-dark);
   color: var(--faint);
@@ -221,6 +227,34 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 .site-header:not(.scrolled) .header-cta {
   background: var(--white);
   color: var(--canopy);
+}
+
+/* Instagram / Facebook icons in the header */
+.header-social {
+  display: flex;
+  gap: 4px;
+  margin-left: -12px;
+  margin-right: -16px;
+}
+.header-social a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: color .2s, background .2s;
+}
+.header-social a:hover {
+  color: var(--grove);
+  background: rgba(74,124,47,.08);
+}
+.header-social svg { width: 22px; height: 22px; }
+.site-header:not(.scrolled) .header-social a { color: rgba(245,237,216,.85); }
+.site-header:not(.scrolled) .header-social a:hover {
+  color: var(--white);
+  background: rgba(255,255,255,.12);
 }
 
 /* Resources dropdown */
@@ -324,21 +358,33 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   overflow: hidden;
   container-type: size;
 }
-/* A 16:9 player sized to cover the frame, 20% oversized so YouTube's title bar and
-   logo fall outside the visible area */
+/* A 16:9 player, oversized so YouTube's title bar and logo fall outside the visible
+   area. On narrow screens it covers the banner with the speaker centred, a little low. */
 .hero-video-frame iframe {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 63%;
+  left: 51%;
   width: 100%;
   height: 100%;
-  width: max(120cqw, 213.4cqh);
-  height: max(120cqh, 67.5cqw);
+  width: max(128cqw, 231.2cqh);
+  height: max(72cqw, 130cqh);
   transform: translate(-50%, -50%);
   border: 0;
   pointer-events: none;
   opacity: 0;
   transition: opacity 1s;
+}
+/* On wide screens the video is sized by the banner's height, sits in the right half,
+   and fades out to the left so the headline is on plain green */
+@media (min-width: 901px) {
+  .hero-video-frame iframe {
+    top: 62%;
+    left: 76%;
+    width: max(231.2cqh, 54cqw);
+    height: max(130cqh, 30.4cqw);
+    -webkit-mask-image: linear-gradient(to right, transparent 4%, #000 38%);
+    mask-image: linear-gradient(to right, transparent 4%, #000 38%);
+  }
 }
 .hero-video-bg.is-playing iframe { opacity: 1; }
 .hero-video-bg::after {
@@ -353,16 +399,16 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     linear-gradient(to top, var(--canopy) 24%, rgba(36,61,16,0) 44%),
     linear-gradient(135deg, rgba(36,61,16,.92) 0%, rgba(36,61,16,.78) 50%, rgba(28,18,8,.85) 100%);
 }
-.hero .container { position: relative; z-index: 1; }
+.hero .container { position: relative; z-index: 1; width: 100%; }
 .hero-inner {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.2fr .8fr;
   gap: 48px;
   align-items: center;
 }
 .hero-content { max-width: 560px; }
 .hero-eyebrow {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -438,6 +484,27 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 .page-hero .hero-body {
   margin-inline: auto;
   max-width: 560px;
+}
+/* Page hero with a photo beside the text (Connect) */
+.page-hero--split { text-align: left; }
+.page-hero-inner {
+  display: grid;
+  grid-template-columns: 1.15fr .85fr;
+  gap: 48px;
+  align-items: center;
+}
+.page-hero--split .page-hero-subtitle { margin-left: 0; }
+.page-hero-photo {
+  display: flex;
+  justify-content: center;
+}
+.page-hero-photo img {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 5 / 6;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ── CARDS ── */
@@ -549,11 +616,24 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 /* ── ABOUT SECTION ── */
+/* The photo fills its column and matches the height of the text beside it */
+.split--about { align-items: stretch; }
+.about-photo-wrap {
+  position: relative;
+  min-height: 460px;
+  container-type: inline-size;
+}
 .about-photo {
-  width: 280px;
-  height: 340px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* where the text runs very tall, stop at a portrait shape and centre instead */
+  max-height: 180cqw;
+  margin: auto;
   border-radius: var(--radius-lg);
   object-fit: cover;
+  object-position: 50% 20%;
   border: 4px solid var(--white);
   box-shadow: var(--shadow);
 }
@@ -563,20 +643,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   border-top: 1px solid var(--border-light);
 }
 .about-creds dt {
-  font-size: 12px;
   font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--faint);
-  margin-bottom: 4px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 .about-creds dt:first-child { margin-top: 0; }
-.about-creds dd {
-  font-size: 16px;
-  color: var(--muted);
-  line-height: 1.5;
-}
 
 /* ── STATS ── */
 .stats-row {
@@ -897,19 +967,19 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   margin-bottom: 12px;
 }
 .footer-tagline {
-  font-size: 15px;
+  font-size: 17px;
   color: rgba(245,237,216,.65);
   line-height: 1.5;
-  max-width: 300px;
+  max-width: 340px;
   margin-bottom: 20px;
 }
 .footer-social {
   display: flex;
-  gap: 12px;
+  gap: 14px;
 }
 .footer-social a {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   background: rgba(255,255,255,.1);
   border-radius: 50%;
   display: flex;
@@ -919,7 +989,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   transition: background .2s, color .2s, transform .2s;
 }
 .footer-social a:hover { background: var(--grove); color: var(--white); transform: translateY(-2px); }
-.footer-social svg { width: 22px; height: 22px; }
+.footer-social svg { width: 28px; height: 28px; }
 
 /* Social bar (prominent, used on home page) */
 .social-bar {
@@ -958,8 +1028,52 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   margin-right: 8px;
 }
 
+/* Named social buttons (home "Follow Along", Connect sidebar) */
+.social-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 220px;
+  padding: 18px 34px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--grove);
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-pill);
+  transition: all .2s;
+}
+.social-btn:hover {
+  background: var(--grove);
+  border-color: var(--grove);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74,124,47,.2);
+}
+.social-btn svg { width: 26px; height: 26px; flex-shrink: 0; }
+.social-buttons--compact {
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+}
+.social-buttons--compact .social-btn {
+  min-width: 0;
+  padding: 9px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  gap: 8px;
+}
+.social-buttons--compact .social-btn svg { width: 18px; height: 18px; }
+
 .footer-heading {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -968,13 +1082,13 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 .footer-links li { margin-bottom: 8px; }
 .footer-links a {
-  font-size: 14px;
+  font-size: 16px;
   color: rgba(245,237,216,.65);
   transition: color .2s;
 }
 .footer-links a:hover { color: var(--white); }
 .footer-contact li {
-  font-size: 14px;
+  font-size: 16px;
   color: rgba(245,237,216,.65);
   margin-bottom: 6px;
 }
@@ -987,7 +1101,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(245,237,216,.4);
 }
 
@@ -1016,18 +1130,32 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   .hero-image { display: none; }
   .split { grid-template-columns: 1fr; gap: 32px; }
   .split--reverse { direction: ltr; }
+  .about-photo-wrap { min-height: 0; }
+  .about-photo {
+    position: static;
+    display: block;
+    width: min(100%, 340px);
+    height: auto;
+    aspect-ratio: 5 / 6;
+    margin-inline: auto;
+  }
+  .page-hero--split { text-align: center; }
+  .page-hero-inner { grid-template-columns: 1fr; gap: 32px; }
+  .page-hero--split .page-hero-subtitle { margin-inline: auto; }
+  .page-hero-photo img { max-width: 300px; }
   .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
   .stats-row { grid-template-columns: 1fr; gap: 12px; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
 }
-@media (max-width: 768px) {
-  .section { padding-block: 56px; }
-  :root { --header-h: 68px; }
-  .site-header .logo-img { height: 42px; }
+/* Below this width the logo, links, icons and button no longer fit on one row, so the
+   links move into the menu button */
+@media (max-width: 1023px) {
   .main-nav,
   .header-cta { display: none; }
-  .menu-toggle { display: flex; }
+  .menu-toggle { display: flex; margin-left: 0; }
+  .header-inner { gap: 8px; }
+  .header-social { margin: 0 0 0 auto; gap: 0; }
   .main-nav.open {
     display: block;
     position: absolute;
@@ -1069,9 +1197,21 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     padding: 0;
   }
   .dropdown-link { padding: 10px 16px; }
+}
+@media (max-width: 768px) {
+  .section { padding-block: 56px; }
+  :root { --header-h: 68px; }
+  .site-header .logo-img { height: 42px; }
   .hero { padding-bottom: 56px; min-height: auto; }
   .form-row { grid-template-columns: 1fr; }
   .timeline::before { left: 19px; }
   .timeline-dot { width: 40px; height: 40px; font-size: 15px; }
   .timeline-item { grid-template-columns: 40px 1fr; gap: 14px; }
+}
+@media (max-width: 600px) {
+  .social-buttons:not(.social-buttons--compact) .social-btn { flex: 1 1 100%; }
+}
+@media (max-width: 350px) {
+  .header-social { display: none; }
+  .menu-toggle { margin-left: auto; }
 }

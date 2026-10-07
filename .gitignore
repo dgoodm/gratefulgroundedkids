@@ -23,3 +23,6 @@ dist/
 
 # Cloudflare
 .wrangler/
+
+# Full-size source images; the site uses the web-sized copies in assets/images
+originals/
