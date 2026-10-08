@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── SMOOTH SCROLL for anchor links ──
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
-      // "#" marks a link with no address yet (LinkedIn): do nothing instead of jumping to the top
+      // "#" marks a link with no address yet: do nothing instead of jumping to the top
       if (anchor.getAttribute('href') === '#') { e.preventDefault(); return; }
       const target = document.querySelector(anchor.getAttribute('href'));
       if (target) {
