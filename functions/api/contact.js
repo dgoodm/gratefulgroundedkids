@@ -81,11 +81,21 @@ export async function onRequestPost(context) {
 
 /* ── Supabase ── */
 
+// The address may be pasted with a trailing slash or with /rest/v1 on the end; only the origin is wanted
+function projectOrigin(value) {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return '';
+  }
+}
+
 // Returns null when Supabase is not configured, so the form still works on email alone
 function supabaseRequest(env, path, init = {}) {
   const key = env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!env.SUPABASE_URL || !key) return null;
-  return fetch(`${env.SUPABASE_URL.replace(/\/+$/, '')}/rest/v1/${path}`, {
+  const origin = projectOrigin(env.SUPABASE_URL);
+  if (!origin || !key) return null;
+  return fetch(`${origin}/rest/v1/${path}`, {
     ...init,
     headers: {
       apikey: key,

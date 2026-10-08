@@ -69,7 +69,7 @@ If Supabase is down or not set up, the emails still go. If email fails, the lead
 | --- | --- | --- |
 | `RESEND_API_KEY` | Secret | Resend API key |
 | `NOTIFICATION_EMAIL` | Text | Where new-lead alerts go. Several addresses may be separated by commas. |
-| `SUPABASE_URL` | Text | Project URL, like `https://xxxx.supabase.co` |
+| `SUPABASE_URL` | Text | Project URL, like `https://xxxx.supabase.co`. Pasting it with `/rest/v1` on the end also works. |
 | `SUPABASE_PUBLISHABLE_KEY` | Text | Supabase publishable (anon) key. Public by design. |
 | `SUPABASE_SECRET_KEY` | Secret | Supabase secret (service role) key. Never put this anywhere else. |
 | `ADMIN_URL` | Text, optional | Dashboard address used in alert emails. Defaults to `https://admin.gratefulgroundedkids.com`. |
@@ -83,6 +83,7 @@ Variables only apply to new deployments: after changing one, retry the latest de
 3. **Admin account:** Authentication → Users → Add user → Create new user, with "Auto Confirm User" ticked. Then run the three-line `insert` at the bottom of `schema.sql` with that email.
 4. **Variables:** add the three `SUPABASE_` values above in Cloudflare and redeploy.
 5. **Subdomain:** in the Cloudflare Pages project → Custom domains, add `admin.gratefulgroundedkids.com`.
+6. **Password-reset links:** in Supabase → Authentication → URL Configuration, set Site URL to `https://admin.gratefulgroundedkids.com` and add `https://admin.gratefulgroundedkids.com/**` and `https://gratefulgroundedkids.com/admin/**` to Redirect URLs. Without this, reset emails send people to `localhost`.
 
 To give someone else access, repeat step 3 for their email.
 

@@ -13,8 +13,18 @@
    - SUPABASE_PUBLISHABLE_KEY  Supabase publishable (anon) key
    ═══════════════════════════════════════ */
 
+// The address may be pasted with a trailing slash or with /rest/v1 on the end
+// (Supabase's Data API page shows it that way); only the origin is wanted.
+function projectOrigin(value) {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return '';
+  }
+}
+
 export function onRequestGet({ env }) {
-  const supabaseUrl = (env.SUPABASE_URL || '').replace(/\/+$/, '');
+  const supabaseUrl = projectOrigin(env.SUPABASE_URL);
   const supabaseKey = env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY || '';
   return new Response(
     JSON.stringify({ configured: Boolean(supabaseUrl && supabaseKey), supabaseUrl, supabaseKey }),

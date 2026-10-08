@@ -69,13 +69,17 @@ function toast(message, isError = false) {
 }
 
 function show(screen) {
-  for (const id of ['screen-loading', 'screen-setup', 'screen-login', 'app']) $(id).hidden = id !== screen;
+  for (const id of ['screen-loading', 'screen-setup', 'screen-login', 'screen-forgot', 'screen-reset', 'app']) {
+    $(id).hidden = id !== screen;
+  }
 }
 
-function showLoginError(message) {
-  $('login-error').textContent = message;
-  $('login-error').hidden = !message;
+// Fills a message line and hides it when there is nothing to say
+function setNote(id, message) {
+  $(id).textContent = message;
+  $(id).hidden = !message;
 }
+const showLoginError = (message) => setNote('login-error', message);
 
 /* ── Dates ── */
 
@@ -170,6 +174,65 @@ async function signOut() {
     // Signing out locally is what matters
   }
   saveSession(null);
+}
+
+/* ── Supabase: password reset ── */
+
+// The short-lived session a reset link carries. It is used only to save the new password.
+let recovery = null;
+
+// Following an emailed link lands back here with the result after "#" in the address
+function readEmailLinkResult() {
+  const params = new URLSearchParams(window.location.hash.slice(1));
+  if (params.get('error') || params.get('error_code')) return { failed: true };
+  if (params.get('type') === 'recovery' && params.get('access_token')) {
+    return {
+      recovery: {
+        access_token: params.get('access_token'),
+        refresh_token: params.get('refresh_token'),
+        expires_at: Number(params.get('expires_at')) || Math.floor(Date.now() / 1000) + (Number(params.get('expires_in')) || 3600),
+      },
+    };
+  }
+  return null;
+}
+
+// Returns true when the address carried the result of an emailed link and it has been dealt with
+function handleEmailLink() {
+  const result = readEmailLinkResult();
+  if (!result) return false;
+  // Keep the one-time tokens out of the address bar and the browser history
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  if (result.recovery) {
+    recovery = result.recovery;
+    show('screen-reset');
+  } else {
+    show('screen-login');
+    showLoginError('That reset link is invalid or has already been used. Use "Forgot password?" to get a new one.');
+  }
+  return true;
+}
+
+function requestPasswordReset(email) {
+  // Bring the link back to wherever the dashboard is open now: the subdomain, or /admin/ on the main site
+  const returnTo = window.location.origin + window.location.pathname;
+  return authRequest(`recover?redirect_to=${encodeURIComponent(returnTo)}`, { email });
+}
+
+async function saveNewPassword(password) {
+  const res = await fetch(`${state.config.supabaseUrl}/auth/v1/user`, {
+    method: 'PUT',
+    headers: {
+      apikey: state.config.supabaseKey,
+      Authorization: `Bearer ${recovery.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ password }),
+  });
+  const user = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(user.msg || user.message || 'Could not save the new password.');
+  saveSession({ ...recovery, user: { id: user.id, email: user.email } });
+  recovery = null;
 }
 
 /* ── Supabase: data ── */
@@ -594,6 +657,9 @@ async function start() {
     show('screen-setup');
     return;
   }
+
+  if (handleEmailLink()) return;
+
   state.session = loadSession();
   if (!state.session) {
     show('screen-login');
@@ -627,6 +693,71 @@ $('login-form').addEventListener('submit', async (e) => {
   }
   button.disabled = false;
   button.textContent = 'Sign In';
+});
+
+$('forgot-link').addEventListener('click', () => {
+  $('forgot-email').value = $('login-email').value;
+  setNote('forgot-error', '');
+  setNote('forgot-note', '');
+  show('screen-forgot');
+});
+
+$('forgot-back').addEventListener('click', () => {
+  showLoginError('');
+  show('screen-login');
+});
+
+$('forgot-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const button = $('forgot-submit');
+  setNote('forgot-error', '');
+  setNote('forgot-note', '');
+  button.disabled = true;
+  button.textContent = 'Sending…';
+  try {
+    await requestPasswordReset($('forgot-email').value.trim());
+    setNote('forgot-note', 'If that email has an admin account, a reset link is on its way. The link can be used once.');
+  } catch (err) {
+    setNote('forgot-error', err.message);
+  }
+  button.disabled = false;
+  button.textContent = 'Send Reset Link';
+});
+
+$('reset-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const button = $('reset-submit');
+  setNote('reset-error', '');
+  if (!recovery) {
+    // The reset link's session is gone (it was already used on this page); start over from sign-in
+    show('screen-login');
+    return;
+  }
+  if ($('reset-password').value !== $('reset-confirm').value) {
+    setNote('reset-error', 'The two passwords do not match.');
+    return;
+  }
+  button.disabled = true;
+  button.textContent = 'Saving…';
+  let saved = false;
+  try {
+    await saveNewPassword($('reset-password').value);
+    saved = true;
+    $('reset-password').value = '';
+    $('reset-confirm').value = '';
+    await enter();
+  } catch (err) {
+    if (saved) {
+      // The password is changed; only getting into the dashboard failed
+      saveSession(null);
+      show('screen-login');
+      showLoginError(err instanceof SessionEnded ? 'Your password was saved. Please sign in.' : err.message);
+    } else {
+      setNote('reset-error', err.message);
+    }
+  }
+  button.disabled = false;
+  button.textContent = 'Save and Sign In';
 });
 
 $('sign-out').addEventListener('click', async () => {
@@ -698,7 +829,10 @@ $('scrim').addEventListener('click', closeLead);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && state.openId) closeLead();
 });
-window.addEventListener('hashchange', openFromHash);
+window.addEventListener('hashchange', () => {
+  if (state.config?.configured && handleEmailLink()) return;
+  openFromHash();
+});
 
 // Pick up new submissions without a manual refresh. A dropped connection stays quiet; an ended session does not.
 setInterval(() => {

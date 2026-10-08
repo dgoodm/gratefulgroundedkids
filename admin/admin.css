@@ -132,7 +132,19 @@ textarea.input { resize: vertical; }
   margin-bottom: 24px;
 }
 .auth-text { color: var(--muted); margin-top: 16px; }
-.auth-card form .auth-text, #login-form .auth-text { text-align: center; font-size: 14px; }
+.auth-text--lead { margin: -8px 0 20px; }
+.form-aside { text-align: right; margin: -8px 0 16px; font-size: 14px; }
+.link-button { color: var(--grove); text-decoration: underline; font-size: inherit; padding: 0; }
+.link-button:hover { color: var(--grove-hover); }
+.form-note {
+  font-size: 14px;
+  color: var(--grove-hover);
+  background: rgba(74,124,47,.1);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+form.auth-card .auth-text:last-child { text-align: center; font-size: 14px; }
 .setup-list { margin: 16px 0 0 4px; }
 .setup-list li { margin-bottom: 6px; }
 code {

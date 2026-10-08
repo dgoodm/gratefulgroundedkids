@@ -32,7 +32,7 @@
         <li><code>SUPABASE_PUBLISHABLE_KEY</code></li>
       </ul>
       <p class="auth-text">Add them under Settings → Variables and Secrets, redeploy the site, then reload this page.</p>
-      <p class="auth-text"><a href="/">← Back to the website</a></p>
+      <p class="auth-text"><a href="https://gratefulgroundedkids.com/">← Back to the website</a></p>
     </div>
   </div>
 
@@ -49,16 +49,52 @@
         <span class="field-label">Password</span>
         <input type="password" id="login-password" class="input" required autocomplete="current-password">
       </label>
+      <p class="form-aside"><button type="button" class="link-button" id="forgot-link">Forgot password?</button></p>
       <p class="form-error" id="login-error" hidden></p>
       <button type="submit" class="btn btn-primary btn-block" id="login-submit">Sign In</button>
-      <p class="auth-text"><a href="/">← Back to the website</a></p>
+      <p class="auth-text"><a href="https://gratefulgroundedkids.com/">← Back to the website</a></p>
+    </form>
+  </div>
+
+  <!-- ═══ FORGOT PASSWORD ═══ -->
+  <div class="screen" id="screen-forgot" hidden>
+    <form class="auth-card" id="forgot-form">
+      <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="auth-logo">
+      <h1 class="auth-title">Reset Password</h1>
+      <p class="auth-text auth-text--lead">Enter your admin email and we'll send a link to choose a new password.</p>
+      <label class="field">
+        <span class="field-label">Email</span>
+        <input type="email" id="forgot-email" class="input" required autocomplete="email">
+      </label>
+      <p class="form-error" id="forgot-error" hidden></p>
+      <p class="form-note" id="forgot-note" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block" id="forgot-submit">Send Reset Link</button>
+      <p class="auth-text"><button type="button" class="link-button" id="forgot-back">← Back to sign in</button></p>
+    </form>
+  </div>
+
+  <!-- ═══ CHOOSE A NEW PASSWORD (reached from the emailed link) ═══ -->
+  <div class="screen" id="screen-reset" hidden>
+    <form class="auth-card" id="reset-form">
+      <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="auth-logo">
+      <h1 class="auth-title">New Password</h1>
+      <label class="field">
+        <span class="field-label">New password</span>
+        <input type="password" id="reset-password" class="input" required minlength="8" autocomplete="new-password">
+      </label>
+      <label class="field">
+        <span class="field-label">Type it again</span>
+        <input type="password" id="reset-confirm" class="input" required minlength="8" autocomplete="new-password">
+      </label>
+      <p class="form-error" id="reset-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block" id="reset-submit">Save and Sign In</button>
     </form>
   </div>
 
   <!-- ═══ DASHBOARD ═══ -->
   <div id="app" hidden>
     <header class="topbar">
-      <a href="/" class="topbar-brand" title="Back to the website">
+      <a href="https://gratefulgroundedkids.com/" class="topbar-brand" title="Back to the website">
         <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids">
         <span>Admin</span>
       </a>
