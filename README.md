@@ -3,15 +3,18 @@
 Website for Doug's Grateful & Grounded Kids — workshops, speaking, and consulting for families raising grateful and grounded kids in an age of entitlement.
 
 **Live site:** https://gratefulgroundedkids.com
+**Admin dashboard:** https://admin.gratefulgroundedkids.com (also at `/admin/` on the main site)
+
+This file is kept out of the published site (see `functions/_middleware.js`).
 
 ## Tech Stack
 
-- **Frontend:** Plain HTML / CSS / JavaScript (no framework)
-- **Hosting:** Cloudflare Pages (auto-deploys from GitHub on push)
-- **Forms:** Cloudflare Pages Functions → Resend API
-- **Documents:** Supabase Storage (future integration)
-- **CMS:** Decap CMS at /admin (future setup)
-- **Email:** Resend for form notification emails
+- **Frontend:** Plain HTML / CSS / JavaScript (no framework, no build step)
+- **Hosting:** Cloudflare Pages (auto-deploys from GitHub on push to `main`)
+- **Contact form:** Cloudflare Pages Function → saves the lead in Supabase → emails through Resend
+- **Database and sign-in:** Supabase (leads, lead history, admin accounts)
+- **Admin dashboard:** plain HTML / CSS / JavaScript in `admin/`, reading Supabase from the browser
+- **Email:** Resend, sending from `noreply@gratefulgroundedkids.com`
 - **Domain email:** Google Workspace (doug@gratefulgroundedkids.com)
 
 ## Project Structure
@@ -22,74 +25,72 @@ gratefulgroundedkids/
 ├── workshop.html           # Workshop details
 ├── services.html           # Seminars, sessions, consulting
 ├── resources.html          # Downloadable docs + book recs
-├── connect.html            # Contact/interest form
+├── connect.html            # Contact form
 ├── 404.html                # Not-found page (without it, Cloudflare serves the home page for missing URLs)
 ├── css/
 │   └── style.css           # Full design system
 ├── js/
-│   ├── main.js             # Nav, scroll, tabs, mobile menu
-│   └── form.js             # Form validation + submission
+│   ├── main.js             # Nav, scroll, tabs, mobile menu, hero video
+│   └── form.js             # Contact form validation + submission
 ├── assets/
-│   ├── images/             # Logo, headshot, book cover
-│   └── docs/               # Downloadable PDFs/documents
-├── functions/
-│   └── api/
-│       └── contact.js      # Cloudflare Pages Function (Resend)
+│   ├── images/             # Logo, photos, icons
+│   └── docs/               # Downloadable documents
 ├── admin/
-│   └── index.html          # CMS placeholder
-├── _headers                # Cloudflare security headers
-├── _redirects              # Cloudflare redirects
-└── .gitignore
+│   ├── index.html          # Dashboard: sign-in, pipeline, submissions, lead history
+│   ├── admin.css
+│   └── admin.js
+├── functions/
+│   ├── _middleware.js      # Hides repo-only files; admin subdomain opens the dashboard
+│   └── api/
+│       ├── contact.js      # Saves a submission as a lead, then sends both emails
+│       └── admin-config.js # Tells the dashboard which Supabase project to use
+├── supabase/
+│   └── schema.sql          # Database setup: run once in the Supabase SQL Editor
+├── _routes.json            # Which addresses run a function (everything else is a plain file)
+├── _headers                # Cloudflare security and cache headers
+├── _redirects
+├── site.webmanifest
+└── originals/              # Full-size source images; on this Mac only, not in the repo
 ```
 
-## Setup
+## How a submission flows
 
-### 1. GitHub Repository
+1. A visitor sends the form on `/connect`. `js/form.js` posts it to `/api/contact`.
+2. `functions/api/contact.js` checks it, drops it silently if the hidden spam-trap field is filled, and saves it to the `leads` table.
+3. It sends two emails through Resend: an alert to `NOTIFICATION_EMAIL` (replying to it replies to the visitor) and a thank-you to the visitor (replying to it reaches Doug).
+4. It records on the lead whether each email went out.
+5. The lead appears under **New** in the dashboard.
 
-```bash
-cd gratefulgroundedkids
-git init
-git add .
-git commit -m "Initial site build"
-git remote add origin https://github.com/YOUR_USERNAME/gratefulgroundedkids.git
-git push -u origin main
-```
+If Supabase is down or not set up, the emails still go. If email fails, the lead is still saved. The visitor sees an error only when both fail.
 
-### 2. Cloudflare Pages
+## Variables (Cloudflare → Workers & Pages → gratefulgroundedkids → Settings → Variables and Secrets)
 
-1. Go to **Cloudflare Dashboard → Pages → Create a project**
-2. Connect your GitHub repo
-3. Build settings:
-   - **Build command:** (leave empty — no build step needed)
-   - **Build output directory:** `/` (root)
-4. Deploy
+| Name | Type | What it is |
+| --- | --- | --- |
+| `RESEND_API_KEY` | Secret | Resend API key |
+| `NOTIFICATION_EMAIL` | Text | Where new-lead alerts go. Several addresses may be separated by commas. |
+| `SUPABASE_URL` | Text | Project URL, like `https://xxxx.supabase.co` |
+| `SUPABASE_PUBLISHABLE_KEY` | Text | Supabase publishable (anon) key. Public by design. |
+| `SUPABASE_SECRET_KEY` | Secret | Supabase secret (service role) key. Never put this anywhere else. |
+| `ADMIN_URL` | Text, optional | Dashboard address used in alert emails. Defaults to `https://admin.gratefulgroundedkids.com`. |
 
-Your site will be live at `your-project.pages.dev` for preview.
+Variables only apply to new deployments: after changing one, retry the latest deployment or push.
 
-### 3. Custom Domain
+## Setting up the dashboard
 
-1. In Cloudflare Pages → your project → **Custom domains**
-2. Add `gratefulgroundedkids.com`
-3. Cloudflare will auto-configure DNS (since the domain is already on Cloudflare)
+1. **Supabase project:** create one for this site.
+2. **Database:** in the SQL Editor, paste all of `supabase/schema.sql` and run it.
+3. **Admin account:** Authentication → Users → Add user → Create new user, with "Auto Confirm User" ticked. Then run the three-line `insert` at the bottom of `schema.sql` with that email.
+4. **Variables:** add the three `SUPABASE_` values above in Cloudflare and redeploy.
+5. **Subdomain:** in the Cloudflare Pages project → Custom domains, add `admin.gratefulgroundedkids.com`.
 
-### 4. Resend Email (wire up later)
+To give someone else access, repeat step 3 for their email.
 
-1. Sign up at [resend.com](https://resend.com)
-2. Verify your domain (`gratefulgroundedkids.com`)
-3. Get your API key
-4. In Cloudflare Pages → Settings → Environment variables, add:
-   - `RESEND_API_KEY` = your key
-   - `NOTIFICATION_EMAIL` = `doug@gratefulgroundedkids.com`
+## Security notes
 
-### 5. Add Your Assets
-
-Replace placeholder files in `assets/`:
-- `assets/images/logo.png` — your logo file
-- `assets/images/headshot.jpg` — Doug's headshot
-- `assets/images/book-cover.jpg` — book cover image
-- `assets/docs/` — add your downloadable PDFs here
-
-Then update the `<img>` `src` attributes in the HTML files to point to your actual filenames.
+- The dashboard's HTML and JavaScript are public, like any web page. The data is not: Supabase only returns leads to a signed-in account that has the `admin` role (`supabase/schema.sql`, row-level security).
+- Visitors never talk to Supabase. Only the server function writes leads, using the secret key.
+- Everything a visitor types is escaped before it goes into an email, and added to the dashboard as text, never as HTML.
 
 ## Design
 

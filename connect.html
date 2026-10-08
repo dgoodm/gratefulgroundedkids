@@ -120,6 +120,12 @@
               <textarea id="message" name="message" class="form-input" rows="5" placeholder="Tell Doug a bit about what you're looking for..."></textarea>
             </div>
 
+            <!-- Spam trap: hidden from people, filled in by bots. Submissions that fill it are dropped. -->
+            <div class="form-trap" aria-hidden="true">
+              <label for="website">Leave this field empty</label>
+              <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+
             <div id="form-error" style="color:var(--harvest);font-size:.9rem;margin-bottom:1rem;"></div>
 
             <button type="submit" class="btn btn-primary btn-lg btn-block">Send Message</button>

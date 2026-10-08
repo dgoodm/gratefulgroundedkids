@@ -924,6 +924,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
   box-shadow: 0 0 0 3px rgba(74,124,47,.12);
 }
 .form-textarea { resize: vertical; min-height: 120px; }
+.form-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .form-select { cursor: pointer; }
 .form-row {
   display: grid;

@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
       phone:     form.querySelector('[name="phone"]')?.value.trim(),
       topic:     form.querySelector('[name="topic"]')?.value,
       message:   form.querySelector('[name="message"]')?.value.trim(),
+      website:   form.querySelector('[name="website"]')?.value,
     };
 
     // Basic validation
@@ -51,10 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showError(err.message || 'Something went wrong. Please try again or email doug@gratefulgroundedkids.com directly.');
       }
     } catch {
-      // If the API endpoint isn't set up yet, show a friendly message
-      form.style.display = 'none';
-      if (successEl) successEl.style.display = 'block';
-      console.log('Form submitted (API endpoint not yet configured). Data:', data);
+      showError('We couldn\'t send your message. Please check your connection and try again, or email doug@gratefulgroundedkids.com directly.');
     }
 
     submitBtn.disabled = false;

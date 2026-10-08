@@ -4,71 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Grateful &amp; Grounded Kids</title>
+  <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#243D10">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Source Sans 3', system-ui, sans-serif;
-      background: #F5EDD8;
-      color: #1C1208;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 2rem;
-    }
-    .admin-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 3rem;
-      max-width: 480px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(28, 18, 8, .08);
-    }
-    .admin-card h1 {
-      font-family: 'Playfair Display', Georgia, serif;
-      font-size: 1.75rem;
-      margin-bottom: .5rem;
-      color: #243D10;
-    }
-    .admin-card p {
-      color: #5A4E37;
-      line-height: 1.6;
-      margin-bottom: 1.5rem;
-    }
-    .admin-card .badge {
-      display: inline-block;
-      background: #EDE3C8;
-      color: #5A4E37;
-      font-size: .8rem;
-      font-weight: 600;
-      padding: .35rem .75rem;
-      border-radius: 20px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      margin-bottom: 1.5rem;
-    }
-    .admin-card a {
-      color: #4A7C2F;
-      text-decoration: none;
-    }
-    .admin-card a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="/admin/admin.css">
 </head>
 <body>
-  <div class="admin-card">
-    <div class="badge">Coming Soon</div>
-    <h1>Admin Dashboard</h1>
-    <p>The content management system for Grateful &amp; Grounded Kids is being set up. Once configured, you'll be able to manage documents, update content, and handle form submissions from here.</p>
-    <p style="font-size:.9rem;color:#8C7D64;">This will be powered by <strong>Decap CMS</strong> backed by your GitHub repository.</p>
-    <p><a href="/">← Back to site</a></p>
+
+  <!-- ═══ LOADING ═══ -->
+  <div class="screen" id="screen-loading">
+    <p class="screen-note">Loading…</p>
   </div>
+
+  <!-- ═══ SETUP NEEDED (shown until Supabase is connected) ═══ -->
+  <div class="screen" id="screen-setup" hidden>
+    <div class="auth-card auth-card--wide">
+      <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="auth-logo">
+      <h1 class="auth-title">Almost Ready</h1>
+      <p class="auth-text">The dashboard is installed, but it is not connected to its database yet. Two values are missing from the website's settings in Cloudflare:</p>
+      <ul class="setup-list">
+        <li><code>SUPABASE_URL</code></li>
+        <li><code>SUPABASE_PUBLISHABLE_KEY</code></li>
+      </ul>
+      <p class="auth-text">Add them under Settings → Variables and Secrets, redeploy the site, then reload this page.</p>
+      <p class="auth-text"><a href="/">← Back to the website</a></p>
+    </div>
+  </div>
+
+  <!-- ═══ SIGN IN ═══ -->
+  <div class="screen" id="screen-login" hidden>
+    <form class="auth-card" id="login-form">
+      <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids" class="auth-logo">
+      <h1 class="auth-title">Admin Sign In</h1>
+      <label class="field">
+        <span class="field-label">Email</span>
+        <input type="email" id="login-email" class="input" required autocomplete="email">
+      </label>
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input type="password" id="login-password" class="input" required autocomplete="current-password">
+      </label>
+      <p class="form-error" id="login-error" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block" id="login-submit">Sign In</button>
+      <p class="auth-text"><a href="/">← Back to the website</a></p>
+    </form>
+  </div>
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="app" hidden>
+    <header class="topbar">
+      <a href="/" class="topbar-brand" title="Back to the website">
+        <img src="/assets/images/logo.png" alt="Grateful &amp; Grounded Kids">
+        <span>Admin</span>
+      </a>
+      <nav class="topbar-nav">
+        <button type="button" class="tab active" data-view="pipeline">Pipeline</button>
+        <button type="button" class="tab" data-view="submissions">Submissions</button>
+      </nav>
+      <div class="topbar-user">
+        <span id="user-email"></span>
+        <button type="button" class="btn btn-ghost-light btn-sm" id="sign-out">Sign Out</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="page-head">
+        <h1 class="page-title" id="view-title">Pipeline</h1>
+        <div class="page-actions">
+          <button type="button" class="btn btn-outline btn-sm" id="refresh">Refresh</button>
+          <button type="button" class="btn btn-primary btn-sm" id="add-lead">Add Lead</button>
+        </div>
+      </div>
+
+      <section class="stats" id="stats" aria-label="Summary"></section>
+
+      <div class="filters">
+        <input type="search" class="input" id="filter-search" placeholder="Search name, email or message…" aria-label="Search">
+        <select class="input" id="filter-topic" aria-label="Topic"></select>
+        <select class="input" id="filter-stage" aria-label="Stage" hidden></select>
+      </div>
+
+      <section class="board" id="view-pipeline" aria-label="Pipeline"></section>
+
+      <section id="view-submissions" hidden>
+        <div class="table-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Received</th>
+                <th>Name</th>
+                <th>Topic</th>
+                <th>Contact</th>
+                <th>Stage</th>
+                <th>Follow-up</th>
+                <th>Last activity</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ═══ LEAD DETAIL ═══ -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="drawer" id="drawer" hidden aria-label="Lead details"></aside>
+
+  <!-- ═══ ADD LEAD ═══ -->
+  <dialog class="dialog" id="add-dialog">
+    <form id="add-form" method="dialog">
+      <h2 class="dialog-title">Add a Lead</h2>
+      <p class="dialog-text">For people who reached Doug some other way: a call, an event, an email.</p>
+      <div class="field-row">
+        <label class="field">
+          <span class="field-label">First name</span>
+          <input type="text" name="first_name" class="input" required maxlength="80">
+        </label>
+        <label class="field">
+          <span class="field-label">Last name</span>
+          <input type="text" name="last_name" class="input" maxlength="80">
+        </label>
+      </div>
+      <label class="field">
+        <span class="field-label">Email</span>
+        <input type="email" name="email" class="input" required maxlength="200">
+      </label>
+      <label class="field">
+        <span class="field-label">Phone</span>
+        <input type="tel" name="phone" class="input" maxlength="40">
+      </label>
+      <label class="field">
+        <span class="field-label">Interested in</span>
+        <select name="topic" class="input" id="add-topic"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">Notes</span>
+        <textarea name="message" class="input" rows="4" maxlength="5000"></textarea>
+      </label>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="add-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Add Lead</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script type="module" src="/admin/admin.js"></script>
 </body>
 </html>

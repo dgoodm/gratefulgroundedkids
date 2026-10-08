@@ -7,3 +7,8 @@
 # Keep this short: files in /assets keep the same name when replaced
 /assets/*
   Cache-Control: public, max-age=3600
+
+# The dashboard should never show up in search results, and should always load its latest version
+/admin/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache
