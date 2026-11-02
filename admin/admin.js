@@ -1,11 +1,13 @@
 /* ═══════════════════════════════════════
    GRATEFUL & GROUNDED KIDS — Admin dashboard
-   Sign-in, lead pipeline, submissions list and
-   the history on each lead.
+   Sign-in, lead pipeline, submissions list, the
+   history on each lead, and the Resources downloads.
 
    Talks to Supabase straight from the browser.
    Row-level security there decides what a signed-in
    account may read, so nothing here is the lock.
+   Downloads go through /api/documents, which checks
+   the same admin role before it touches GitHub.
    ═══════════════════════════════════════ */
 
 const STAGES = [
@@ -28,6 +30,11 @@ const ACTIVITY_KINDS = {
 };
 const SESSION_KEY = 'ggk-admin-session';
 const REFRESH_EVERY_MS = 60000;
+const MAX_FILE_BYTES = 25000000;
+const PUBLISH_CHECK_MS = 5000;
+const PUBLISH_WAIT_MS = 180000;
+const FILE_KINDS = { pdf: 'PDF', doc: 'Word', docx: 'Word', xls: 'Excel', xlsx: 'Excel', ppt: 'PowerPoint', pptx: 'PowerPoint' };
+const UNREACHABLE = "The dashboard can't reach its database right now. Check your connection and try again. If this keeps happening, the Supabase project may be paused.";
 
 const state = {
   config: null,   // { supabaseUrl, supabaseKey }
@@ -38,6 +45,9 @@ const state = {
   topic: '',
   stage: '',
   openId: null,
+  documents: null,    // { configured, sections }, once the tab has been opened
+  documentsBusy: false,
+  publishing: null,   // version of the latest change until it reaches the site
 };
 let noteDraft = '';
 let askIfReplySent = false;
@@ -107,6 +117,15 @@ function ago(iso) {
 
 /* ── Supabase: sign-in ── */
 
+// A browser reports an unreachable server as "Failed to fetch", which helps no one
+async function reach(url, init) {
+  try {
+    return await fetch(url, init);
+  } catch {
+    throw new Error(UNREACHABLE);
+  }
+}
+
 class SessionEnded extends Error {}
 
 function loadSession() {
@@ -128,7 +147,7 @@ function saveSession(session) {
 }
 
 async function authRequest(path, body, token) {
-  const res = await fetch(`${state.config.supabaseUrl}/auth/v1/${path}`, {
+  const res = await reach(`${state.config.supabaseUrl}/auth/v1/${path}`, {
     method: 'POST',
     headers: {
       apikey: state.config.supabaseKey,
@@ -220,7 +239,7 @@ function requestPasswordReset(email) {
 }
 
 async function saveNewPassword(password) {
-  const res = await fetch(`${state.config.supabaseUrl}/auth/v1/user`, {
+  const res = await reach(`${state.config.supabaseUrl}/auth/v1/user`, {
     method: 'PUT',
     headers: {
       apikey: state.config.supabaseKey,
@@ -239,7 +258,7 @@ async function saveNewPassword(password) {
 
 async function api(path, { method = 'GET', body, returning = false } = {}, isRetry = false) {
   if (state.session.expires_at - 60 < Date.now() / 1000) await refreshSession();
-  const res = await fetch(`${state.config.supabaseUrl}/rest/v1/${path}`, {
+  const res = await reach(`${state.config.supabaseUrl}/rest/v1/${path}`, {
     method,
     headers: {
       apikey: state.config.supabaseKey,
@@ -355,6 +374,170 @@ async function deleteLead(lead) {
   }
 }
 
+/* ── Resources downloads ── */
+
+async function documentsApi(path, init = {}, isRetry = false) {
+  if (state.session.expires_at - 60 < Date.now() / 1000) await refreshSession();
+  const res = await fetch(path, {
+    ...init,
+    headers: { Authorization: `Bearer ${state.session.access_token}`, 'Content-Type': 'application/json' },
+  }).catch(() => {
+    throw new Error("Couldn't reach the website. Check your connection and try again.");
+  });
+  if (res.status === 401 && !isRetry) {
+    await refreshSession();
+    return documentsApi(path, init, true);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.message || `Request failed (${res.status}).`);
+  return data;
+}
+
+async function loadDocuments() {
+  state.documents = await documentsApi('/api/documents');
+  render();
+}
+
+function readAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.slice(reader.result.indexOf(',') + 1));
+    reader.onerror = () => reject(new Error('Could not read that file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadFile(file) {
+  const content = await readAsBase64(file);
+  const { sha } = await documentsApi('/api/documents/upload', {
+    method: 'POST',
+    body: JSON.stringify({ content, encoding: 'base64' }),
+  });
+  return sha;
+}
+
+async function publish(change) {
+  const result = await documentsApi('/api/documents', { method: 'POST', body: JSON.stringify(change) });
+  state.documents = { configured: true, sections: result.sections };
+  state.publishing = result.version;
+  render();
+  watchPublish(result.version);
+}
+
+// Each save stamps the page, so seeing the stamp on the page means Cloudflare has finished
+async function watchPublish(version) {
+  const giveUpAt = Date.now() + PUBLISH_WAIT_MS;
+  while (Date.now() < giveUpAt) {
+    await new Promise((resolve) => setTimeout(resolve, PUBLISH_CHECK_MS));
+    if (state.publishing !== version) return;
+    const page = await fetch('/resources', { cache: 'no-store' }).then((res) => res.text()).catch(() => '');
+    if (page.includes(version)) {
+      state.publishing = null;
+      setPublishNote('Live on the website.');
+      return;
+    }
+  }
+  if (state.publishing !== version) return;
+  state.publishing = null;
+  setPublishNote('Saved, but it is taking longer than usual to appear on the website. Check again in a few minutes.', true);
+}
+
+function setPublishNote(message, isWarning = false) {
+  setNote('publish-note', message);
+  $('publish-note').classList.toggle('publish-note--warn', isWarning);
+}
+
+async function changeDocument(change) {
+  if (state.documentsBusy) return;
+  state.documentsBusy = true;
+  renderDocuments();
+  try {
+    await publish(change);
+  } catch (err) {
+    fail(err);
+  }
+  state.documentsBusy = false;
+  renderDocuments();
+}
+
+function removeDocument(section, doc) {
+  if (!window.confirm(`Remove "${doc.title}" from the website? The file will be deleted from the site.`)) return;
+  changeDocument({ action: 'remove', section: section.id, file: doc.file });
+}
+
+function documentRow(section, doc, index) {
+  const kind = FILE_KINDS[doc.file.split('.').pop().toLowerCase()] || 'File';
+  const busy = state.documentsBusy;
+  const move = (direction, label, symbol, disabled) =>
+    el('button', {
+      type: 'button',
+      class: 'icon-button',
+      title: label,
+      'aria-label': `${label}: ${doc.title}`,
+      disabled: disabled || busy,
+      onclick: () => changeDocument({ action: 'move', section: section.id, file: doc.file, direction }),
+    }, symbol);
+  return el('div', { class: 'doc-row' },
+    el('div', { class: 'doc-row-text' },
+      el('div', { class: 'doc-row-title' }, doc.title, ' ', el('span', { class: 'badge' }, kind)),
+      el('div', { class: 'doc-row-desc' }, doc.description),
+    ),
+    el('div', { class: 'doc-row-actions' },
+      move('up', 'Move up', '↑', index === 0),
+      move('down', 'Move down', '↓', index === section.documents.length - 1),
+      el('a', { class: 'btn btn-outline btn-sm', href: `/assets/docs/${doc.file}`, target: '_blank', rel: 'noopener' }, 'View'),
+      el('button', { type: 'button', class: 'btn btn-outline btn-sm', disabled: busy, onclick: () => openDocumentDialog(section, doc) }, 'Replace or Edit'),
+      el('button', { type: 'button', class: 'btn btn-danger btn-sm', disabled: busy, onclick: () => removeDocument(section, doc) }, 'Remove'),
+    ),
+  );
+}
+
+function renderDocuments() {
+  const list = $('documents-list');
+  const data = state.documents;
+  $('add-document').disabled = !data?.configured;
+  if (state.publishing) setPublishNote('Publishing to the website. This usually takes about a minute.');
+  if (!data) {
+    list.replaceChildren(el('p', { class: 'documents-empty' }, 'Loading…'));
+  } else if (!data.configured) {
+    list.replaceChildren(el('p', { class: 'documents-empty' }, 'Publishing is not set up yet: GITHUB_TOKEN needs adding in Cloudflare.'));
+  } else {
+    list.replaceChildren(
+      ...data.sections.map((section) =>
+        el('section', { class: 'doc-section' },
+          el('h2', { class: 'doc-section-title' }, section.label, el('span', { class: 'column-count' }, String(section.documents.length))),
+          section.documents.length
+            ? section.documents.map((doc, index) => documentRow(section, doc, index))
+            : el('p', { class: 'documents-empty' }, 'Nothing here yet'),
+        ),
+      ),
+    );
+  }
+}
+
+let editing = null; // { section, doc } while the dialog is changing an existing document
+
+function openDocumentDialog(section, doc) {
+  editing = doc ? { section, doc } : null;
+  $('doc-form').reset();
+  setNote('doc-error', '');
+  setChosenFile();
+  $('doc-dialog-title').textContent = doc ? 'Replace or Edit' : 'Add a Document';
+  $('doc-dialog-text').textContent = doc ? `In ${section.label}. Leave the file alone to change only the wording.` : 'It will appear at the end of the section you choose.';
+  $('doc-section-field').hidden = Boolean(doc);
+  $('doc-section').required = !doc;
+  $('doc-file-label').textContent = doc ? 'New file (optional)' : 'File';
+  $('doc-choose').textContent = doc ? 'Choose Replacement File' : 'Choose File';
+  $('doc-title').value = doc?.title || '';
+  $('doc-description').value = doc?.description || '';
+  $('doc-dialog').showModal();
+}
+
+function setChosenFile() {
+  const file = $('doc-file').files[0];
+  $('doc-file-name').textContent = file ? file.name : editing ? editing.doc.file : 'No file chosen';
+}
+
 /* ── Rendering: summary, board, table ── */
 
 function visibleLeads() {
@@ -464,15 +647,27 @@ function renderTable() {
   $('table-body').replaceChildren(...(rows.length ? rows : [empty]));
 }
 
+const VIEW_TITLES = { pipeline: 'Pipeline', submissions: 'Submissions', documents: 'Files & Documents' };
+
 function render() {
-  const onPipeline = state.view === 'pipeline';
+  const { view } = state;
+  const onDocuments = view === 'documents';
+  $('view-title').textContent = VIEW_TITLES[view];
+  $('view-pipeline').hidden = view !== 'pipeline';
+  $('view-submissions').hidden = view !== 'submissions';
+  $('view-documents').hidden = !onDocuments;
+  $('stats').hidden = onDocuments;
+  $('filters').hidden = onDocuments;
+  $('filter-stage').hidden = view !== 'submissions';
+  $('add-lead').hidden = onDocuments;
+  $('add-document').hidden = !onDocuments;
+  document.querySelectorAll('.tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.view === view));
+  if (onDocuments) {
+    renderDocuments();
+    return;
+  }
   renderStats();
-  $('view-title').textContent = onPipeline ? 'Pipeline' : 'Submissions';
-  $('view-pipeline').hidden = !onPipeline;
-  $('view-submissions').hidden = onPipeline;
-  $('filter-stage').hidden = onPipeline;
-  document.querySelectorAll('.tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.view === state.view));
-  if (onPipeline) renderBoard();
+  if (view === 'pipeline') renderBoard();
   else renderTable();
 }
 
@@ -771,6 +966,7 @@ document.querySelectorAll('.tab').forEach((tab) =>
   tab.addEventListener('click', () => {
     state.view = tab.dataset.view;
     render();
+    if (state.view === 'documents' && !state.documents) loadDocuments().catch(fail);
   }),
 );
 
@@ -791,7 +987,9 @@ $('filter-stage').addEventListener('change', (e) => {
   render();
 });
 
-$('refresh').addEventListener('click', () => loadLeads().then(() => toast('Up to date')).catch(fail));
+$('refresh').addEventListener('click', () =>
+  (state.view === 'documents' ? loadDocuments() : loadLeads()).then(() => toast('Up to date')).catch(fail),
+);
 
 $('add-lead').addEventListener('click', () => $('add-dialog').showModal());
 $('add-cancel').addEventListener('click', () => $('add-dialog').close());
@@ -823,6 +1021,59 @@ $('add-form').addEventListener('submit', async (e) => {
   } catch (err) {
     fail(err);
   }
+});
+
+$('doc-section').append(el('option', { value: '' }, 'Choose a section…'), ...['chores-work', 'finances', 'technology'].map((id) =>
+  el('option', { value: id }, { 'chores-work': 'Chores & Work', finances: 'Finances', technology: 'Technology' }[id]),
+));
+$('add-document').addEventListener('click', () => openDocumentDialog());
+$('doc-cancel').addEventListener('click', () => $('doc-dialog').close());
+$('doc-choose').addEventListener('click', () => $('doc-file').click());
+$('doc-file').addEventListener('change', () => {
+  setChosenFile();
+  const file = $('doc-file').files[0];
+  if (file && !editing && !$('doc-title').value) $('doc-title').value = file.name.replace(/\.[^.]+$/, '');
+});
+$('doc-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const file = $('doc-file').files[0];
+  const problem =
+    !editing && !file ? 'Please choose a file to upload.'
+    : file && !file.size ? 'That file is empty.'
+    : file && file.size > MAX_FILE_BYTES ? 'Files can be up to 25 MB.'
+    : '';
+  setNote('doc-error', problem);
+  if (problem) return;
+
+  const button = $('doc-save');
+  button.disabled = true;
+  state.documentsBusy = true;
+  try {
+    button.textContent = file ? 'Uploading…' : 'Saving…';
+    const blobSha = file ? await uploadFile(file) : undefined;
+    button.textContent = 'Saving…';
+    await publish({
+      action: editing ? 'update' : 'add',
+      section: editing ? editing.section.id : $('doc-section').value,
+      file: editing?.doc.file,
+      title: $('doc-title').value,
+      description: $('doc-description').value,
+      fileName: file?.name,
+      blobSha,
+    });
+    $('doc-dialog').close();
+  } catch (err) {
+    if (err instanceof SessionEnded) {
+      $('doc-dialog').close();
+      fail(err);
+    } else {
+      setNote('doc-error', err.message);
+    }
+  }
+  state.documentsBusy = false;
+  button.disabled = false;
+  button.textContent = 'Save and Publish';
+  renderDocuments();
 });
 
 $('scrim').addEventListener('click', closeLead);

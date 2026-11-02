@@ -8,6 +8,11 @@
 /assets/*
   Cache-Control: public, max-age=3600
 
+# Documents can be replaced from the dashboard, so browsers check for a new version every time
+/assets/docs/*
+  ! Cache-Control
+  Cache-Control: no-cache
+
 # The dashboard should never show up in search results, and should always load its latest version
 /admin/*
   X-Robots-Tag: noindex, nofollow

@@ -41,9 +41,15 @@ gratefulgroundedkids/
 │   └── admin.js
 ├── functions/
 │   ├── _middleware.js      # Hides repo-only files; admin subdomain opens the dashboard
+│   ├── _lib/
+│   │   └── documents.js    # Reads and rewrites the Resources downloads, commits to GitHub
 │   └── api/
 │       ├── contact.js      # Saves a submission as a lead, then sends both emails
-│       └── admin-config.js # Tells the dashboard which Supabase project to use
+│       ├── admin-config.js # Tells the dashboard which Supabase project to use
+│       ├── documents.js    # Files & Documents: list and publish changes (admins only)
+│       ├── documents/
+│       │   └── upload.js   # Passes an uploaded file through to GitHub
+│       └── keep-alive.js   # Keeps the free Supabase project from pausing
 ├── supabase/
 │   └── schema.sql          # Database setup: run once in the Supabase SQL Editor
 ├── _routes.json            # Which addresses run a function (everything else is a plain file)
@@ -72,6 +78,7 @@ If Supabase is down or not set up, the emails still go. If email fails, the lead
 | `SUPABASE_URL` | Text | Project URL, like `https://xxxx.supabase.co`. Pasting it with `/rest/v1` on the end also works. |
 | `SUPABASE_PUBLISHABLE_KEY` | Text | Supabase publishable (anon) key. Public by design. |
 | `SUPABASE_SECRET_KEY` | Secret | Supabase secret (service role) key. Never put this anywhere else. |
+| `GITHUB_TOKEN` | Secret | Fine-grained GitHub token for this one repository, with Contents read and write. Lets Files & Documents publish. |
 | `ADMIN_URL` | Text, optional | Dashboard address used in alert emails. Defaults to `https://admin.gratefulgroundedkids.com`. |
 
 Variables only apply to new deployments: after changing one, retry the latest deployment or push.
@@ -87,9 +94,20 @@ Variables only apply to new deployments: after changing one, retry the latest de
 
 To give someone else access, repeat step 3 for their email.
 
+## Files & Documents
+
+The dashboard tab lists the downloads in `resources.html`, which stays the only list: each section sits between `<!-- documents:id -->` markers. Saving makes one GitHub commit of the page and the file, and Cloudflare deploys it like any other push, so the public page keeps working without Supabase. Allowed types are PDF, Word, Excel and PowerPoint, up to 25 MB (Cloudflare Pages' limit per file). `/api/documents` checks the admin role itself before using `GITHUB_TOKEN`.
+
+Because the dashboard commits to `main`, pull before editing here.
+
+## Supabase free plan
+
+Supabase pauses free projects after about a week without activity, and sign-in and lead saving stop until it is restored from the Supabase dashboard. `.github/workflows/keep-alive.yml` calls `/api/keep-alive` every two days to prevent that. GitHub turns scheduled workflows off after 60 days with no commits to a public repository, and it emails before doing so.
+
 ## Security notes
 
 - The dashboard's HTML and JavaScript are public, like any web page. The data is not: Supabase only returns leads to a signed-in account that has the `admin` role (`supabase/schema.sql`, row-level security).
+- `GITHUB_TOKEN` stays in Cloudflare. The dashboard never sees it.
 - Visitors never talk to Supabase. Only the server function writes leads, using the secret key.
 - Everything a visitor types is escaped before it goes into an email, and added to the dashboard as text, never as HTML.
 

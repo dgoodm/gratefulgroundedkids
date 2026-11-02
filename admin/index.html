@@ -101,6 +101,7 @@
       <nav class="topbar-nav">
         <button type="button" class="tab active" data-view="pipeline">Pipeline</button>
         <button type="button" class="tab" data-view="submissions">Submissions</button>
+        <button type="button" class="tab" data-view="documents">Files &amp; Documents</button>
       </nav>
       <div class="topbar-user">
         <span id="user-email"></span>
@@ -114,12 +115,13 @@
         <div class="page-actions">
           <button type="button" class="btn btn-outline btn-sm" id="refresh">Refresh</button>
           <button type="button" class="btn btn-primary btn-sm" id="add-lead">Add Lead</button>
+          <button type="button" class="btn btn-primary btn-sm" id="add-document" hidden>+ Add New</button>
         </div>
       </div>
 
       <section class="stats" id="stats" aria-label="Summary"></section>
 
-      <div class="filters">
+      <div class="filters" id="filters">
         <input type="search" class="input" id="filter-search" placeholder="Search name, email or message…" aria-label="Search">
         <select class="input" id="filter-topic" aria-label="Topic"></select>
         <select class="input" id="filter-stage" aria-label="Stage" hidden></select>
@@ -144,6 +146,12 @@
             <tbody id="table-body"></tbody>
           </table>
         </div>
+      </section>
+
+      <section id="view-documents" hidden>
+        <p class="documents-intro">These are the downloads on the Resources page. Changes go live on the website by themselves, about a minute after you save.</p>
+        <p class="publish-note" id="publish-note" hidden></p>
+        <div id="documents-list"></div>
       </section>
     </main>
   </div>
@@ -186,6 +194,40 @@
       <div class="dialog-actions">
         <button type="button" class="btn btn-outline btn-sm" id="add-cancel">Cancel</button>
         <button type="submit" class="btn btn-primary btn-sm">Add Lead</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ═══ ADD OR EDIT A DOCUMENT ═══ -->
+  <dialog class="dialog" id="doc-dialog">
+    <form id="doc-form" method="dialog">
+      <h2 class="dialog-title" id="doc-dialog-title">Add a Document</h2>
+      <p class="dialog-text" id="doc-dialog-text">It will appear at the end of the section you choose.</p>
+      <label class="field" id="doc-section-field">
+        <span class="field-label">Section</span>
+        <select class="input" id="doc-section" required></select>
+      </label>
+      <div class="field">
+        <span class="field-label" id="doc-file-label">File</span>
+        <div class="file-pick">
+          <button type="button" class="btn btn-outline btn-sm" id="doc-choose">Choose File</button>
+          <span class="file-name" id="doc-file-name">No file chosen</span>
+        </div>
+        <input type="file" id="doc-file" hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+        <p class="field-hint">PDF, Word, Excel or PowerPoint, up to 25 MB.</p>
+      </div>
+      <label class="field">
+        <span class="field-label">Title</span>
+        <input type="text" class="input" id="doc-title" required maxlength="120">
+      </label>
+      <label class="field">
+        <span class="field-label">Short description</span>
+        <textarea class="input" id="doc-description" rows="3" required maxlength="300"></textarea>
+      </label>
+      <p class="form-error" id="doc-error" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-outline btn-sm" id="doc-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm" id="doc-save">Save and Publish</button>
       </div>
     </form>
   </dialog>
